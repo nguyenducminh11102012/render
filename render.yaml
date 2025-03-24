@@ -1,4 +1,3 @@
-name: Ngrok-RDP-Tunnel
 
 services:
   - name: ngrok-worker
