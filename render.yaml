@@ -1,0 +1,36 @@
+name: Ngrok-RDP-Tunnel
+
+services:
+  - name: ngrok-worker
+    type: worker
+    runtime: docker
+    plan: starter
+    region: oregon
+    dockerfilePath: Dockerfile  # Sử dụng Dockerfile Windows Server LTSC 2025
+    buildCommand: |
+      Invoke-WebRequest https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -OutFile ngrok.zip
+      Expand-Archive ngrok.zip
+    startCommand: |
+      .\ngrok\ngrok.exe authtoken 2nyiyWrhpT6OwyUoaoZ2zdE9nNo_7KtHBQxaox3Wx2t9qBHTT  # Token ngrok trực tiếp
+      Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+      Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+      Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
+      Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "Datnguyentv.com" -Force)
+      .\ngrok\ngrok.exe tcp 3389
+    scaling:
+      minInstances: 1
+      maxInstances: 1
+
+dockerfile:
+  version: "3"
+  services:
+    ngrok-worker:
+      image: mcr.microsoft.com/windows/server:ltsc2025
+      build:
+        context: .
+        dockerfile: Dockerfile  # Đảm bảo Dockerfile được đặt đúng vị trí
+      volumes:
+        - C:\ngrok:/ngrok  # Tạo volume để lưu trữ ngrok
+      ports:
+        - "3389:3389"  # Mở cổng RDP cho ngrok
+      entrypoint: ["C:\\ngrok\\ngrok.exe", "tcp", "3389"]
