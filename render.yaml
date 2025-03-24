@@ -3,10 +3,11 @@ name: Ngrok-RDP-Tunnel
 services:
   - name: ngrok-worker
     type: worker
-    runtime: docker
+    runtime: image
     plan: starter
     region: oregon
-    dockerfilePath: Dockerfile  # Sử dụng Dockerfile Windows Server LTSC 2025
+    image:
+      url: mcr.microsoft.com/windows/server:ltsc2025  # Using Windows Server LTSC 2025 image
     buildCommand: |
       Invoke-WebRequest https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -OutFile ngrok.zip
       Expand-Archive ngrok.zip
@@ -20,17 +21,3 @@ services:
     scaling:
       minInstances: 1
       maxInstances: 1
-
-dockerfile:
-  version: "3"
-  services:
-    ngrok-worker:
-      image: mcr.microsoft.com/windows/server:ltsc2025
-      build:
-        context: .
-        dockerfile: Dockerfile  # Đảm bảo Dockerfile được đặt đúng vị trí
-      volumes:
-        - C:\ngrok:/ngrok  # Tạo volume để lưu trữ ngrok
-      ports:
-        - "3389:3389"  # Mở cổng RDP cho ngrok
-      entrypoint: ["C:\\ngrok\\ngrok.exe", "tcp", "3389"]
