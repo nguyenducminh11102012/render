@@ -17,5 +17,5 @@ services:
       .\ngrok\ngrok.exe tcp 3389
     scaling:
       minInstances: 1
-      maxInstances: 1
+      maxInstances: 2
       targetCPUPercent: 60  # Added a valid scaling target value
